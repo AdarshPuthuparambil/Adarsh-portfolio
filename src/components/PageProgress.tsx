@@ -156,7 +156,7 @@ function RubikProgress({ progress }: { progress: number }) {
 
   return (
     <div
-      className="group/cube relative h-14 w-14 shrink-0"
+      className="group/cube relative h-14 w-14 shrink-0 hidden sm:block"
       style={{ perspective: '420px' }}
     >
       <span className="pointer-events-none absolute top-1/2 right-[calc(100%+0.65rem)] z-20 -translate-y-1/2 rounded bg-ink px-2 py-1 font-display text-[10px] tracking-wide whitespace-nowrap text-paper opacity-0 transition-opacity duration-200 group-hover/cube:opacity-100 dark:bg-mist dark:text-night">
@@ -254,11 +254,11 @@ export function PageProgress() {
   return (
     <aside
       aria-label="Page position"
-      className="pointer-events-none fixed top-1/2 right-3 z-50 hidden -translate-y-1/2 sm:right-5 md:block"
+      className="pointer-events-none fixed top-1/2 right-3 z-50  -translate-y-1/2 right-0 sm:right-5 md:block"
     >
       <div className="pointer-events-auto flex items-center gap-3">
-        <div className="flex flex-col items-end gap-1">
-          <span className="font-display text-[10px] tracking-[0.22em] text-ink/45 uppercase transition-colors duration-300 dark:text-mist/40">
+        <div className="hidden sm:flex flex-col items-end gap-1">
+          <span className="font-display text-[10px] tracking-[0.22em] text-ink/45 uppercase transition-colors duration-300 dark:text-mist/40 ">
             {active.name}
           </span>
           <span className="font-display text-sm font-semibold tabular-nums text-accent transition-colors duration-300 dark:text-accent-bright">
