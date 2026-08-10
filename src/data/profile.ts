@@ -58,7 +58,7 @@ export const experience: ExperienceItem[] = [
         name: 'StandbyTravel',
         stack: 'React Native, React.js, TypeScript',
         logo: '/StandbyLogo.png',
-        link: 'https://standbytravel.vofoxsolutions.com/login',
+        link: 'https://standbyapp.theflightx.com',
         description:
           'Flight ticket booking platform for airline employees across mobile (Android & iOS) and web.',
         linkLabel: 'standbytravel',
