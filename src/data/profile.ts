@@ -10,6 +10,8 @@ export const profile = {
   linkedin: 'https://www.linkedin.com/in/adarsh-puthuparambil-0a61a7175',
   instagram: 'https://www.instagram.com/adarsh_puthuparambil',
   whatsapp: 'https://wa.me/917592876321',
+  resume: '/ADARSH Resume.pdf',
+  resumeFileName: 'ADARSH-Resume.pdf',
   summary:
     'Software Engineer with 2+ years of experience in React, React Native, and TypeScript. I build web and cross-platform mobile applications, integrate REST APIs and GraphQL, and partner with clients to ship scalable business solutions.',
   headline:
@@ -203,5 +205,10 @@ export const socialLinks = [
     id: 'whatsapp' as const,
     label: 'WhatsApp',
     href: 'https://wa.me/917592876321',
+  },
+  {
+    id: 'E-mail' as const,
+    label: 'E-mail',
+    href: 'mailto:adarshputhuparambil324@gmail.com',
   },
 ]

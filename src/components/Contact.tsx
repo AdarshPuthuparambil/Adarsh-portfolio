@@ -1,6 +1,7 @@
 import { Mail, MapPin, Phone } from 'lucide-react'
 import { profile } from '../data/profile'
 import { Reveal } from './Reveal'
+import { ResumeActions } from './ResumeActions'
 import { SocialLinks } from './SocialLinks'
 
 export function Contact() {
@@ -79,7 +80,10 @@ export function Contact() {
         </div>
 
         <Reveal delay={320}>
-          <SocialLinks variant="buttons" className="mt-10" />
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+            <ResumeActions />
+            <SocialLinks variant="buttons" />
+          </div>
         </Reveal>
       </div>
     </section>

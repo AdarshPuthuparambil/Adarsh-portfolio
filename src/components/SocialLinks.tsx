@@ -1,5 +1,6 @@
 import { socialLinks } from '../data/profile'
 import {
+  EmailIcon,
   GithubIcon,
   InstagramIcon,
   LinkedinIcon,
@@ -11,6 +12,7 @@ const icons = {
   linkedin: LinkedinIcon,
   instagram: InstagramIcon,
   whatsapp: WhatsappIcon,
+  'E-mail': EmailIcon,
 } as const
 
 type SocialLinksProps = {
@@ -32,13 +34,15 @@ export function SocialLinks({
         {socialLinks.map((social, index) => {
           const Icon = icons[social.id]
           const isPrimary = index === 0
+          const isExternal = social.href.startsWith('http')
 
           return (
             <a
               key={social.id}
               href={social.href}
-              target="_blank"
-              rel="noreferrer"
+              {...(isExternal
+                ? { target: '_blank', rel: 'noreferrer' }
+                : {})}
               className={
                 isPrimary
                   ? 'inline-flex items-center gap-2 bg-ink px-5 py-3 text-sm font-semibold text-paper transition-transform hover:-translate-y-0.5 dark:bg-mist dark:text-night'
@@ -63,13 +67,13 @@ export function SocialLinks({
     <div className={`flex items-center gap-2 ${className}`}>
       {socialLinks.map((social) => {
         const Icon = icons[social.id]
+        const isExternal = social.href.startsWith('http')
 
         return (
           <a
             key={social.id}
             href={social.href}
-            target="_blank"
-            rel="noreferrer"
+            {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
             aria-label={social.label}
             className={iconClass}
           >

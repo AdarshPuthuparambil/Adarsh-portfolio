@@ -1,6 +1,7 @@
 import { ArrowDownRight, Mail } from 'lucide-react'
 import { profile } from '../data/profile'
 import { useTheme } from '../hooks/useTheme'
+import { ResumeActions } from './ResumeActions'
 import { SocialLinks } from './SocialLinks'
 
 export function Hero() {
@@ -65,7 +66,7 @@ export function Hero() {
 
         <div className="animate-rise delay-400 mt-10 flex flex-wrap items-center gap-3 sm:gap-4">
           <a
-            href="#projects"
+            href="#experience"
             className={`group inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 ${
               isDark
                 ? 'bg-mist text-night'
@@ -89,6 +90,10 @@ export function Hero() {
             <Mail size={16} />
             Contact me
           </a>
+          <ResumeActions
+            tone={isDark ? 'onMedia' : 'default'}
+            className="w-full sm:w-auto"
+          />
           <SocialLinks
             tone={isDark ? 'onMedia' : 'default'}
             className="ml-1 sm:ml-3"
