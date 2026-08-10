@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { Menu, X } from 'lucide-react'
 import { navLinks, profile } from '../data/profile'
 import { useTheme } from '../hooks/useTheme'
 import { ThemeToggle } from './ThemeToggle'
 
+const MENU_EXIT_MS = 320
+
 export function Navbar() {
   const { theme } = useTheme()
   const [open, setOpen] = useState(false)
+  const [menuMounted, setMenuMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -17,19 +20,37 @@ export function Navbar() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
+    if (open || !menuMounted) return
+
+    const timeoutId = window.setTimeout(() => setMenuMounted(false), MENU_EXIT_MS)
+    return () => window.clearTimeout(timeoutId)
+  }, [open, menuMounted])
+
+  useEffect(() => {
+    document.body.style.overflow = menuMounted ? 'hidden' : ''
     return () => {
       document.body.style.overflow = ''
     }
-  }, [open])
+  }, [menuMounted])
 
-  const overHero = !scrolled && !open
+  const closeMenu = () => setOpen(false)
+  const toggleMenu = () => {
+    if (open) {
+      setOpen(false)
+      return
+    }
+    setMenuMounted(true)
+    setOpen(true)
+  }
+
+  const menuActive = open || menuMounted
+  const overHero = !scrolled && !menuActive
   const onDarkHero = overHero && theme === 'dark'
 
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled || open
+        scrolled || menuActive
           ? 'border-b border-ink/10 bg-paper/85 backdrop-blur-md dark:border-mist/10 dark:bg-night/85'
           : 'bg-transparent'
       }`}
@@ -42,7 +63,7 @@ export function Navbar() {
               ? 'text-mist hover:text-accent-bright'
               : 'text-ink hover:text-accent dark:text-mist dark:hover:text-accent-bright'
           }`}
-          onClick={() => setOpen(false)}
+          onClick={closeMenu}
         >
           {profile.brand}
         </a>
@@ -68,7 +89,9 @@ export function Navbar() {
           <ThemeToggle onDarkSurface={onDarkHero} />
           <button
             type="button"
-            onClick={() => setOpen((value) => !value)}
+            onClick={toggleMenu}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
             aria-label={open ? 'Close menu' : 'Open menu'}
             className={`inline-flex h-10 w-10 items-center justify-center rounded-full border ${
               onDarkHero
@@ -81,15 +104,24 @@ export function Navbar() {
         </div>
       </div>
 
-      {open && (
-        <div className="border-t border-ink/10 bg-paper px-5 py-6 dark:border-mist/10 dark:bg-night md:hidden">
-          <nav className="flex flex-col gap-4">
-            {navLinks.map((link) => (
+      {menuMounted && (
+        <div
+          id="mobile-nav"
+          className={`mobile-nav-panel md:hidden ${open ? 'is-open' : 'is-closing'}`}
+        >
+          <div className="mobile-nav-liquid" aria-hidden="true">
+            <span className="mobile-nav-blob mobile-nav-blob-a" />
+            <span className="mobile-nav-blob mobile-nav-blob-b" />
+            <span className="mobile-nav-blob mobile-nav-blob-c" />
+          </div>
+          <nav className="relative z-10 flex flex-col gap-1 px-5 py-6">
+            {navLinks.map((link, index) => (
               <a
                 key={link.href}
                 href={link.href}
-                onClick={() => setOpen(false)}
-                className="font-display text-2xl font-semibold text-ink dark:text-mist"
+                onClick={closeMenu}
+                style={{ '--nav-i': index } as CSSProperties}
+                className="mobile-nav-link font-display text-2xl font-semibold text-ink dark:text-mist"
               >
                 {link.label}
               </a>
