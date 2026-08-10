@@ -227,6 +227,42 @@
   animation-duration: 0.45s;
 }
 
+@keyframes click-ring {
+  0% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(7.5);
+  }
+}
+
+@keyframes click-particle {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--burst-angle))
+      translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--burst-angle))
+      translateY(-42px) scale(0.35);
+  }
+}
+
+.click-ring {
+  animation: click-ring 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.click-ring-delay {
+  animation: click-ring 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+}
+
+.click-particle {
+  animation: click-particle 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
@@ -247,7 +283,10 @@
 
   .theme-sun-rays,
   .theme-star,
-  .dark .theme-toggle {
+  .dark .theme-toggle,
+  .click-ring,
+  .click-ring-delay,
+  .click-particle {
     animation: none;
   }
 }

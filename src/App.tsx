@@ -1,4 +1,5 @@
 import { About } from './components/About'
+import { ClickBurst } from './components/ClickBurst'
 import { Contact } from './components/Contact'
 import { Education } from './components/Education'
 import { Experience } from './components/Experience'
@@ -16,6 +17,7 @@ function App() {
       <div className="min-h-svh bg-paper text-ink transition-colors duration-300 dark:bg-night dark:text-mist">
         <Navbar />
         <PageProgress />
+        <ClickBurst />
         <main>
           <Hero />
           <About />

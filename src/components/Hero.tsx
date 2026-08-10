@@ -1,12 +1,49 @@
 import { ArrowDownRight, Mail } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { profile } from '../data/profile'
 import { useTheme } from '../hooks/useTheme'
 import { ResumeActions } from './ResumeActions'
 import { SocialLinks } from './SocialLinks'
 
+const HEADLINE_START_MS = 450
+const HEADLINE_CHAR_MS = 38
+
 export function Hero() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
+  const [typedHeadline, setTypedHeadline] = useState('')
+  const [isTyping, setIsTyping] = useState(true)
+
+  useEffect(() => {
+    const full = profile.headline
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+
+    if (prefersReducedMotion) {
+      setTypedHeadline(full)
+      setIsTyping(false)
+      return
+    }
+
+    let index = 0
+    let intervalId = 0
+    const startId = window.setTimeout(() => {
+      intervalId = window.setInterval(() => {
+        index += 1
+        setTypedHeadline(full.slice(0, index))
+        if (index >= full.length) {
+          window.clearInterval(intervalId)
+          setIsTyping(false)
+        }
+      }, HEADLINE_CHAR_MS)
+    }, HEADLINE_START_MS)
+
+    return () => {
+      window.clearTimeout(startId)
+      window.clearInterval(intervalId)
+    }
+  }, [])
 
   return (
     <section
@@ -47,11 +84,20 @@ export function Hero() {
         </h1>
 
         <p
-          className={`animate-rise delay-200 mt-6 max-w-xl font-display text-2xl leading-snug font-semibold transition-colors duration-300 sm:mt-8 sm:text-3xl ${
+          className={`mt-6 max-w-xl font-display text-2xl leading-snug font-semibold transition-colors duration-300 sm:mt-8 sm:text-3xl ${
             isDark ? 'text-mist/95' : 'text-ink-soft'
           }`}
+          aria-label={profile.headline}
         >
-          {profile.headline}
+          <span aria-hidden>{typedHeadline}</span>
+          {isTyping ? (
+            <span
+              aria-hidden
+              className={`ml-0.5 inline-block h-[0.9em] w-[0.08em] translate-y-[0.08em] animate-pulse align-baseline ${
+                isDark ? 'bg-mist/90' : 'bg-ink-soft'
+              }`}
+            />
+          ) : null}
         </p>
 
         <p
