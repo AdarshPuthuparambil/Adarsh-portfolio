@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adarsh-portfolio-weld-one.vercel.app/sitemap.xml
