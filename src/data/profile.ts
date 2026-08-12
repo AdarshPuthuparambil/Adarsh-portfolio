@@ -7,7 +7,7 @@ export const profile = {
   phone: '+91 7592876321',
   email: 'adarshputhuparambil324@gmail.com',
   github: 'https://github.com/AdarshPuthuparambil',
-  linkedin: 'www.linkedin.com/in/adarshpaReact',
+  linkedin: 'http://www.linkedin.com/in/adarshpaReact',
   instagram: 'https://www.instagram.com/adarsh_puthuparambil',
   whatsapp: 'https://wa.me/917592876321',
   resume: '/ADARSH Resume.pdf',
@@ -189,7 +189,7 @@ export const socialLinks = [
   {
     id: 'linkedin' as const,
     label: 'LinkedIn',
-    href: 'www.linkedin.com/in/adarshpaReact',
+    href: 'http://www.linkedin.com/in/adarshpaReact',
   },
   {
     id: 'github' as const,
