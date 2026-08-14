@@ -4,8 +4,8 @@ const sections = [
   { id: 'top', label: '01', name: 'Home' },
   { id: 'about', label: '02', name: 'About' },
   { id: 'experience', label: '03', name: 'Experience' },
-  { id: 'projects', label: '04', name: 'Projects' },
-  { id: 'skills', label: '05', name: 'Skills' },
+  { id: 'skills', label: '04', name: 'Skills' },
+  { id: 'projects', label: '05', name: 'Projects' },
   { id: 'education', label: '06', name: 'Education' },
   { id: 'contact', label: '07', name: 'Contact' },
 ]
@@ -227,11 +227,14 @@ export function PageProgress() {
 
       const offset = window.innerHeight * 0.35
       let current = sections[0].id
+      let closestTop = -Infinity
 
       for (const section of sections) {
         const el = document.getElementById(section.id)
         if (!el) continue
-        if (el.getBoundingClientRect().top <= offset) {
+        const top = el.getBoundingClientRect().top
+        if (top <= offset && top >= closestTop) {
+          closestTop = top
           current = section.id
         }
       }
@@ -254,7 +257,7 @@ export function PageProgress() {
   return (
     <aside
       aria-label="Page position"
-      className="pointer-events-none fixed top-1/2 right-3 z-50  -translate-y-1/2 right-0 sm:right-5 md:block"
+      className="pointer-events-none fixed top-1/2 right-3 z-50 hidden -translate-y-1/2 sm:right-5 md:block"
     >
       <div className="pointer-events-auto flex items-center gap-3">
         <div className="hidden sm:flex flex-col items-end gap-1">

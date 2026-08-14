@@ -1,4 +1,5 @@
 import { About } from './components/About'
+import { BottomNav } from './components/BottomNav'
 import { ClickBurst } from './components/ClickBurst'
 import { Contact } from './components/Contact'
 import { Education } from './components/Education'
@@ -14,8 +15,9 @@ import { ThemeProvider } from './hooks/useTheme'
 function App() {
   return (
     <ThemeProvider>
-      <div className="min-h-svh bg-paper text-ink transition-colors duration-300 dark:bg-night dark:text-mist">
+      <div className="min-h-svh bg-paper pb-[calc(5.25rem+env(safe-area-inset-bottom))] text-ink transition-colors duration-300 md:pb-0 dark:bg-night dark:text-mist">
         <Navbar />
+        <BottomNav />
         <PageProgress />
         <ClickBurst />
         <main>
