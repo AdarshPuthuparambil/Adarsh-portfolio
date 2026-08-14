@@ -34,7 +34,7 @@ export function Navbar() {
               : 'text-ink hover:text-accent dark:text-mist dark:hover:text-accent-bright'
           }`}
         >
-          {profile.brand}
+          {profile.name.toUpperCase()}
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">
