@@ -95,7 +95,7 @@ export const projects = [
     stack: ['React', 'TypeScript', 'Tailwind CSS', 'ASP.NET Core Web API', 'REST API', 'PostgreSQL', 'C#'],
     description:
       'A web-based temple billing system for managing vazhipadu bookings, devotees, billing, payments, daily collections, and reports.',
-    link: 'https://temple-billing-4t8pgwkyp-portfolio-b7c3.vercel.app/',
+    link: 'https://temple-billing-ui.vercel.app/',
     linkLabel: 'temple-billing.vercel.app',
   },
   {
