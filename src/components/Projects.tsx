@@ -1,5 +1,6 @@
 import { projects } from '../data/profile'
 import { Reveal } from './Reveal'
+import { ExternalLink } from 'lucide-react'
 
 export function Projects() {
   return (
@@ -10,7 +11,7 @@ export function Projects() {
             Selected work
           </p>
           <h2 className="mt-3 max-w-xl font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl dark:text-mist">
-           Academic and Professional Projects.
+            Academic and Professional Projects.
           </h2>
         </Reveal>
 
@@ -27,8 +28,20 @@ export function Projects() {
               </span>
               <div>
                 <h3 className="font-display text-2xl font-bold text-ink transition-colors group-hover:text-accent sm:text-3xl dark:text-mist dark:group-hover:text-accent-bright">
-                  {project.title}
-                </h3>
+                  {project.link ? (
+                    <a
+                    className="inline-flex items-center gap-1.5 font-display text-2xl font-bold text-ink transition-colors group-hover:text-accent sm:text-3xl dark:text-mist dark:group-hover:text-accent-bright"
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {project.title}
+                      <ExternalLink size={20} />
+
+                    </a>
+                  ) : (
+                    <span>{project.title}</span>
+                  )}                </h3>
                 <p className="mt-3 max-w-2xl leading-relaxed text-ink-soft/85 dark:text-fog">
                   {project.description}
                 </p>

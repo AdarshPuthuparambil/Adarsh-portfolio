@@ -91,6 +91,14 @@ export const experience: ExperienceItem[] = [
 
 export const projects = [
   {
+    title: 'Temple Billing System',
+    stack: ['React', 'TypeScript', 'Tailwind CSS', 'ASP.NET Core Web API', 'REST API', 'PostgreSQL', 'C#'],
+    description:
+      'A web-based temple billing system for managing vazhipadu bookings, devotees, billing, payments, daily collections, and reports.',
+    link: 'https://temple-billing-ci3w4asax-portfolio-b7c3.vercel.app/',
+    linkLabel: 'temple-billing.vercel.app',
+  },
+  {
     title: 'E-Commerce Website',
     stack: ['React', 'TypeScript', 'Tailwind CSS', 'REST API'],
     description:
