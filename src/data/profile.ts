@@ -99,6 +99,15 @@ export const projects = [
     linkLabel: 'temple-billing.vercel.app',
   },
   {
+    title: 'Array Vacation Planner Website',
+    stack: ['React', 'TypeScript', 'Tailwind CSS'],
+    description:
+      'A website for planning vacations and trips with a focus on user experience and accessibility.',
+    link: 'https://wellnessyatraa.vercel.app/',
+    linkLabel: 'array-vacation-planner',
+
+  },
+  {
     title: 'E-Commerce Website',
     stack: ['React', 'TypeScript', 'Tailwind CSS', 'REST API'],
     description:
