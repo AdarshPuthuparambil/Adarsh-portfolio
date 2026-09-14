@@ -36,7 +36,7 @@ export function Projects() {
                       rel="noopener noreferrer"
                     >
                       {project.title}
-                      <ExternalLink size={20} />
+                      <ExternalLink className="text-blue-500" size={20} />
 
                     </a>
                   ) : (
