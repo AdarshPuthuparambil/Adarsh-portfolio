@@ -1,5 +1,6 @@
 import { About } from './components/About'
 import { BottomNav } from './components/BottomNav'
+import { ButterflyFollower } from './components/ButterflyFollower'
 import { ClickBurst } from './components/ClickBurst'
 import { Contact } from './components/Contact'
 import { Education } from './components/Education'
@@ -20,6 +21,7 @@ function App() {
         <BottomNav />
         <PageProgress />
         <ClickBurst />
+        <ButterflyFollower />
         <main>
           <Hero />
           <About />

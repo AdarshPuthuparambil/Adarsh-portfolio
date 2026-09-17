@@ -263,6 +263,68 @@
   animation: click-particle 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.butterfly-follower[data-active='true'] {
+  display: block;
+  margin-left: -19px;
+  margin-top: -19px;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 0 8px color-mix(in oklab, var(--color-accent-bright) 55%, transparent));
+  transition: opacity 0.35s ease;
+}
+
+.butterfly-svg {
+  display: block;
+  animation: bf-bob 2.4s ease-in-out infinite;
+}
+
+.bf-wing-left,
+.bf-wing-right {
+  transform-box: view-box;
+  transform-origin: 32px 32px;
+}
+
+.bf-wing-left {
+  animation: bf-flap-left var(--flap, 0.32s) ease-in-out infinite;
+}
+
+.bf-wing-right {
+  animation: bf-flap-right var(--flap, 0.32s) ease-in-out infinite;
+}
+
+.dark .butterfly-follower[data-active='true'] {
+  filter: drop-shadow(0 0 10px color-mix(in oklab, var(--color-accent-bright) 70%, transparent));
+}
+
+@keyframes bf-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes bf-flap-left {
+  0%,
+  100% {
+    transform: scaleX(1) rotate(-2deg);
+  }
+  50% {
+    transform: scaleX(0.22) rotate(4deg);
+  }
+}
+
+@keyframes bf-flap-right {
+  0%,
+  100% {
+    transform: scaleX(1) rotate(2deg);
+  }
+  50% {
+    transform: scaleX(0.22) rotate(-4deg);
+  }
+}
+
 /* Mobile bottom nav — liquid glass bar */
 .bottom-nav {
   border: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
@@ -327,7 +389,20 @@
   .dark .theme-toggle,
   .click-ring,
   .click-ring-delay,
-  .click-particle {
+  .click-particle,
+  .butterfly-svg,
+  .bf-wing-left,
+  .bf-wing-right {
     animation: none;
+  }
+
+  .butterfly-follower {
+    display: none !important;
+  }
+}
+
+@media (pointer: coarse) {
+  .butterfly-follower {
+    display: none !important;
   }
 }
