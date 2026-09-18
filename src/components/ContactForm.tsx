@@ -89,9 +89,10 @@ export function ContactForm() {
 
   return (
     <form
+      id="contact-form"
       onSubmit={onSubmit}
       noValidate
-      className="relative  pt-8 dark:border-mist/10"
+      className="relative scroll-mt-24 pt-8 dark:border-mist/10"
     >
       <div className="max-w-2xl">
         <h3 className="font-display text-2xl font-bold text-ink dark:text-mist">

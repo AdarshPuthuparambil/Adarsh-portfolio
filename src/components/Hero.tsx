@@ -126,7 +126,7 @@ export function Hero() {
             />
           </a>
           <a
-            href={`mailto:${profile.email}`}
+            href="#contact-form"
             className={`inline-flex items-center gap-2 border px-5 py-3 text-sm font-semibold transition-colors duration-300 ${
               isDark
                 ? 'border-mist/35 text-mist hover:border-accent-bright hover:text-accent-bright'
