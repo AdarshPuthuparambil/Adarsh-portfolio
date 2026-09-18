@@ -1,5 +1,6 @@
 import { Mail, MapPin, Phone } from 'lucide-react'
 import { profile } from '../data/profile'
+import { ContactForm } from './ContactForm'
 import { Reveal } from './Reveal'
 import { ResumeActions } from './ResumeActions'
 import { SocialLinks } from './SocialLinks'
@@ -80,6 +81,12 @@ export function Contact() {
         </div>
 
         <Reveal delay={320}>
+          <div className="mt-12 border border-dashed border-ink/10 p-5 dark:border-mist/10 dark:bg-gray-800 rounded-lg">
+            <ContactForm />
+          </div>
+        </Reveal>
+
+        <Reveal delay={380}>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
             <ResumeActions />
             <SocialLinks variant="buttons" />
