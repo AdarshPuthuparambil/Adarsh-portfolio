@@ -118,6 +118,13 @@ function resendErrorStatus(error: ErrorResponse): number {
   return error.statusCode === 422 ? 400 : 500
 }
 
+// Resend errors carry no credentials, but build the string explicitly so a
+// future SDK field cannot leak into the log by accident.
+function describeResendError(error: ErrorResponse): string {
+  const code = error.statusCode ? ` (HTTP ${error.statusCode})` : ''
+  return `${error.name}${code}: ${error.message}`
+}
+
 function isHoneypotFilled(payload: ContactApiRequest): boolean {
   return Boolean(payload.website && payload.website.trim() !== '')
 }
@@ -187,7 +194,8 @@ export async function processContact(input: {
 
   if (isHoneypotFilled(payload)) {
     console.warn(
-      '[contact] Honeypot field was filled; dropping the submission without sending.',
+      '[contact] Skipped send: honeypot field was filled, so no email was sent. ' +
+        'A browser password manager autofilling the hidden "website" field looks identical to a bot here.',
     )
     return success()
   }
@@ -215,8 +223,10 @@ export async function processContact(input: {
   const duplicateKey = submissionKey(ip, values)
   const alreadySent = recentSubmissions.get(duplicateKey)
   if (alreadySent) {
-    console.info(
-      `[contact] Duplicate submission within ${DUPLICATE_WINDOW_MS}ms; reusing email ${alreadySent.emailId}.`,
+    console.warn(
+      `[contact] Skipped send: identical submission ${Math.round((now - alreadySent.at) / 1000)}s ago, ` +
+        `so no new email was sent. Replaying email ${alreadySent.emailId}. ` +
+        `Change the form content to send again, or wait ${Math.round(DUPLICATE_WINDOW_MS / 1000)}s.`,
     )
     return success(alreadySent.emailId)
   }
@@ -226,6 +236,9 @@ export async function processContact(input: {
 
   try {
     const resend = new Resend(config.apiKey)
+    console.info(`[contact] Resend API initialized (from ${config.from}, to ${config.to})`)
+
+    console.info('[contact] Sending email...')
     const { data, error } = await resend.emails.send({
       from: `Website Contact Form <${config.from}>`,
       to: [config.to],
@@ -236,28 +249,23 @@ export async function processContact(input: {
     })
 
     if (error) {
-      console.error('[contact] Resend rejected the email:', {
-        name: error.name,
-        message: error.message,
-        statusCode: error.statusCode,
-      })
+      console.error(`[contact] Resend error: ${describeResendError(error)}`)
       return genericError(resendErrorStatus(error))
     }
 
     if (!data?.id) {
       console.error(
-        '[contact] Resend returned no error but no email id; treating as a failure.',
+        '[contact] Resend error: the send resolved without an error but returned no email id.',
       )
       return genericError(500)
     }
 
-    console.info(`[contact] Resend accepted the email: ${data.id}`)
+    console.info(`[contact] Resend success: ${data.id}`)
     recentSubmissions.set(duplicateKey, { at: now, emailId: data.id })
     return success(data.id)
   } catch (error) {
     console.error(
-      '[contact] Sending the email threw:',
-      error instanceof Error ? `${error.name}: ${error.message}` : error,
+      `[contact] Resend error: ${error instanceof Error ? `${error.name}: ${error.message}` : String(error)}`,
     )
     return genericError(500)
   }
