@@ -7,19 +7,13 @@ import type { ViteDevServer } from 'vite'
 
 const EMAIL_ENV_KEYS = ['EMAIL_API_KEY', 'EMAIL_FROM', 'EMAIL_TO'] as const
 const CONTACT_MAX_BODY_BYTES = 16 * 1024
+const CONTACT_ERROR_MESSAGE =
+  'Unable to send your message right now. Please try again later.'
 
 function applyEmailEnv(env: Record<string, string>) {
   for (const key of EMAIL_ENV_KEYS) {
     if (env[key]) process.env[key] = env[key]
   }
-}
-
-function getClientIp(req: IncomingMessage): string {
-  const forwarded = req.headers['x-forwarded-for']
-  if (typeof forwarded === 'string' && forwarded.trim() !== '') {
-    return forwarded.split(',')[0]?.trim() || 'unknown'
-  }
-  return req.socket.remoteAddress ?? 'unknown'
 }
 
 function readRequestBody(
@@ -56,72 +50,98 @@ function readRequestBody(
   })
 }
 
-type ContactResponseBody = {
-  success: boolean
-  message: string
-  emailId?: string
+// Minimal stand-ins for VercelRequest/VercelResponse so the dev server can run
+// api/contact.ts unchanged instead of a parallel dev-only implementation.
+type VercelLikeRequest = {
+  method?: string
+  headers: IncomingMessage['headers']
+  socket: IncomingMessage['socket']
+  body?: unknown
 }
 
-function sendJson(
-  res: ServerResponse,
-  status: number,
-  body: ContactResponseBody,
-) {
+type VercelLikeResponse = {
+  setHeader: (name: string, value: string) => void
+  status: (code: number) => VercelLikeResponse
+  json: (body: unknown) => void
+  end: () => void
+}
+
+type VercelLikeHandler = (
+  req: VercelLikeRequest,
+  res: VercelLikeResponse,
+) => Promise<unknown>
+
+function createResponseShim(res: ServerResponse): VercelLikeResponse {
+  let statusCode = 200
+
+  const shim: VercelLikeResponse = {
+    setHeader(name, value) {
+      res.setHeader(name, value)
+    },
+    status(code) {
+      statusCode = code
+      return shim
+    },
+    json(body) {
+      res.statusCode = statusCode
+      res.setHeader('Content-Type', 'application/json; charset=utf-8')
+      res.end(JSON.stringify(body))
+    },
+    end() {
+      res.statusCode = statusCode
+      res.end()
+    },
+  }
+
+  return shim
+}
+
+function sendError(res: ServerResponse, status: number) {
   res.statusCode = status
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
   res.setHeader('Cache-Control', 'no-store')
-  res.end(JSON.stringify(body))
+  res.end(JSON.stringify({ success: false, message: CONTACT_ERROR_MESSAGE }))
 }
-
-type ProcessContact = (input: {
-  payload: unknown
-  ip: string
-}) => Promise<{
-  status: number
-  body: ContactResponseBody
-}>
 
 async function handleDevContactRequest(
   req: IncomingMessage,
   res: ServerResponse,
-  loadProcessContact: () => Promise<ProcessContact>,
+  loadHandler: () => Promise<VercelLikeHandler>,
 ) {
-  if (req.method === 'OPTIONS') {
-    res.statusCode = 204
-    res.setHeader('Allow', 'POST')
-    res.end()
-    return
-  }
+  let body: unknown
 
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST')
-    sendJson(res, 405, {
-      success: false,
-      message: 'Unable to send your message right now. Please try again later.',
-    })
-    return
+  if (req.method === 'POST') {
+    try {
+      body = await readRequestBody(req, CONTACT_MAX_BODY_BYTES)
+    } catch (error) {
+      console.error(
+        '[contact] Request failed before reaching the email step:',
+        error instanceof Error ? `${error.name}: ${error.message}` : error,
+      )
+      const tooLarge =
+        error instanceof Error && error.message === 'payload_too_large'
+      sendError(res, tooLarge ? 413 : 400)
+      return
+    }
   }
 
   try {
-    const rawBody = await readRequestBody(req, CONTACT_MAX_BODY_BYTES)
-    const payload = rawBody ? (JSON.parse(rawBody) as unknown) : {}
-    const processContact = await loadProcessContact()
-    const result = await processContact({
-      payload,
-      ip: getClientIp(req),
-    })
-    sendJson(res, result.status, result.body)
+    const handler = await loadHandler()
+    await handler(
+      {
+        method: req.method,
+        headers: req.headers,
+        socket: req.socket,
+        body,
+      },
+      createResponseShim(res),
+    )
   } catch (error) {
     console.error(
-      '[contact] Request failed before reaching the email step:',
+      '[contact] Dev handler threw:',
       error instanceof Error ? `${error.name}: ${error.message}` : error,
     )
-    const tooLarge =
-      error instanceof Error && error.message === 'payload_too_large'
-    sendJson(res, tooLarge ? 413 : 400, {
-      success: false,
-      message: 'Unable to send your message right now. Please try again later.',
-    })
+    if (!res.writableEnded) sendError(res, 500)
   }
 }
 
@@ -138,9 +158,9 @@ function contactApiPlugin(): Plugin {
 
         void handleDevContactRequest(req, res, async () => {
           const mod = (await server.ssrLoadModule(
-            path.resolve(server.config.root, 'server/contact.ts'),
-          )) as { processContact: ProcessContact }
-          return mod.processContact
+            path.resolve(server.config.root, 'api/contact.ts'),
+          )) as { default: VercelLikeHandler }
+          return mod.default
         })
       })
     },

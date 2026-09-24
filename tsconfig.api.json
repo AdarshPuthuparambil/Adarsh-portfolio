@@ -5,8 +5,11 @@
     "lib": ["ES2023"],
     "types": ["node"],
     "skipLibCheck": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    // Match the Vercel serverless runtime: package.json declares "type":
+    // "module", so these files run as real Node ESM. nodenext makes tsc reject
+    // extensionless relative imports that Node cannot resolve at runtime.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
@@ -17,5 +20,5 @@
     "esModuleInterop": true,
     "isolatedModules": true
   },
-  "include": ["api", "server"]
+  "include": ["api"]
 }

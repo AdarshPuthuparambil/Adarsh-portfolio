@@ -107,13 +107,25 @@ export function ContactForm() {
         className="absolute -left-[10000px] h-0 w-0 overflow-hidden"
         aria-hidden="true"
       >
-        <label htmlFor={`${idPrefix}-website`}>Website</label>
+        {/*
+          The field is named "hp-field" rather than "website" because password
+          managers treat a website/url field as an autofill target, and an
+          autofilled honeypot is indistinguishable from a bot server-side. The
+          data-* attributes are the documented opt-outs for 1Password,
+          LastPass, Bitwarden and Dashlane. The wire format still calls this
+          "website", so the API contract is unchanged.
+        */}
+        <label htmlFor={`${idPrefix}-hp-field`}>Leave this field empty</label>
         <input
-          id={`${idPrefix}-website`}
-          name="website"
+          id={`${idPrefix}-hp-field`}
+          name="hp-field"
           type="text"
           tabIndex={-1}
           autoComplete="off"
+          data-1p-ignore
+          data-lpignore="true"
+          data-bwignore
+          data-form-type="other"
           value={website}
           onChange={(event) => setWebsite(event.target.value)}
         />
