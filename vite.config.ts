@@ -56,10 +56,16 @@ function readRequestBody(
   })
 }
 
+type ContactResponseBody = {
+  success: boolean
+  message: string
+  emailId?: string
+}
+
 function sendJson(
   res: ServerResponse,
   status: number,
-  body: { success: boolean; message: string },
+  body: ContactResponseBody,
 ) {
   res.statusCode = status
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -72,7 +78,7 @@ type ProcessContact = (input: {
   ip: string
 }) => Promise<{
   status: number
-  body: { success: boolean; message: string }
+  body: ContactResponseBody
 }>
 
 async function handleDevContactRequest(
@@ -106,7 +112,10 @@ async function handleDevContactRequest(
     })
     sendJson(res, result.status, result.body)
   } catch (error) {
-    console.error('Contact API request failed.')
+    console.error(
+      '[contact] Request failed before reaching the email step:',
+      error instanceof Error ? `${error.name}: ${error.message}` : error,
+    )
     const tooLarge =
       error instanceof Error && error.message === 'payload_too_large'
     sendJson(res, tooLarge ? 413 : 400, {

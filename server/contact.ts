@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { Resend } from 'resend'
+import { Resend, type ErrorResponse } from 'resend'
 import { validateContactForm } from '../src/lib/contactValidation'
 import {
   CONTACT_ERROR_MESSAGE,
@@ -20,8 +20,13 @@ type ContactHandlerResult = {
   body: ContactApiResponse
 }
 
+type SentSubmission = {
+  at: number
+  emailId: string
+}
+
 const hitsByIp = new Map<string, number[]>()
-const recentSubmissions = new Map<string, number>()
+const recentSubmissions = new Map<string, SentSubmission>()
 
 function genericError(status = 500): ContactHandlerResult {
   return {
@@ -33,12 +38,13 @@ function genericError(status = 500): ContactHandlerResult {
   }
 }
 
-function success(): ContactHandlerResult {
+function success(emailId?: string): ContactHandlerResult {
   return {
     status: 200,
     body: {
       success: true,
       message: 'Your message has been sent successfully.',
+      ...(emailId ? { emailId } : {}),
     },
   }
 }
@@ -70,9 +76,13 @@ function stripNullBytes(value: string): string {
   return sanitized
 }
 
-function pruneMap(map: Map<string, number>, windowMs: number, now: number) {
-  for (const [key, timestamp] of map) {
-    if (now - timestamp > windowMs) map.delete(key)
+function pruneMap(
+  map: Map<string, SentSubmission>,
+  windowMs: number,
+  now: number,
+) {
+  for (const [key, entry] of map) {
+    if (now - entry.at > windowMs) map.delete(key)
   }
 }
 
@@ -99,6 +109,15 @@ function submissionKey(ip: string, values: ContactFormData): string {
     .digest('hex')
 }
 
+// Resend answers 422 when the payload we built from the submission is
+// unusable, which is the only failure the caller can fix. Everything else -
+// rejected key, unverified sender domain, quota - is ours. Note that Resend
+// also names the unverified-domain 403 a "validation_error", so the status
+// code is the reliable signal here, not the error name.
+function resendErrorStatus(error: ErrorResponse): number {
+  return error.statusCode === 422 ? 400 : 500
+}
+
 function isHoneypotFilled(payload: ContactApiRequest): boolean {
   return Boolean(payload.website && payload.website.trim() !== '')
 }
@@ -122,8 +141,22 @@ function getEmailConfig(): { apiKey: string; from: string; to: string } | null {
   const from = stripHeaderInjection(process.env.EMAIL_FROM ?? '')
   const to = stripHeaderInjection(process.env.EMAIL_TO ?? '')
 
+  const missing = [
+    apiKey ? null : 'EMAIL_API_KEY',
+    from ? null : 'EMAIL_FROM',
+    to ? null : 'EMAIL_TO',
+  ].filter((name): name is string => name !== null)
+
+  if (missing.length > 0) {
+    console.error(`[contact] Missing environment variables: ${missing.join(', ')}.`)
+    return null
+  }
   if (!apiKey || !from || !to) return null
+
   if (from.includes('<') || from.includes('>') || to.includes('<') || to.includes('>')) {
+    console.error(
+      '[contact] EMAIL_FROM and EMAIL_TO must be bare addresses without angle brackets.',
+    )
     return null
   }
 
@@ -153,6 +186,9 @@ export async function processContact(input: {
   }
 
   if (isHoneypotFilled(payload)) {
+    console.warn(
+      '[contact] Honeypot field was filled; dropping the submission without sending.',
+    )
     return success()
   }
 
@@ -177,19 +213,20 @@ export async function processContact(input: {
 
   pruneMap(recentSubmissions, DUPLICATE_WINDOW_MS, now)
   const duplicateKey = submissionKey(ip, values)
-  if (recentSubmissions.has(duplicateKey)) {
-    return success()
+  const alreadySent = recentSubmissions.get(duplicateKey)
+  if (alreadySent) {
+    console.info(
+      `[contact] Duplicate submission within ${DUPLICATE_WINDOW_MS}ms; reusing email ${alreadySent.emailId}.`,
+    )
+    return success(alreadySent.emailId)
   }
 
   const config = getEmailConfig()
-  if (!config) {
-    console.error('Contact email is not configured.')
-    return genericError(500)
-  }
+  if (!config) return genericError(500)
 
   try {
     const resend = new Resend(config.apiKey)
-    const result = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: `Website Contact Form <${config.from}>`,
       to: [config.to],
       replyTo: values.email,
@@ -198,15 +235,30 @@ export async function processContact(input: {
       text: buildEnquiryText(values),
     })
 
-    if (result.error) {
-      console.error('Failed to send contact email.')
+    if (error) {
+      console.error('[contact] Resend rejected the email:', {
+        name: error.name,
+        message: error.message,
+        statusCode: error.statusCode,
+      })
+      return genericError(resendErrorStatus(error))
+    }
+
+    if (!data?.id) {
+      console.error(
+        '[contact] Resend returned no error but no email id; treating as a failure.',
+      )
       return genericError(500)
     }
 
-    recentSubmissions.set(duplicateKey, now)
-    return success()
-  } catch {
-    console.error('Failed to send contact email.')
+    console.info(`[contact] Resend accepted the email: ${data.id}`)
+    recentSubmissions.set(duplicateKey, { at: now, emailId: data.id })
+    return success(data.id)
+  } catch (error) {
+    console.error(
+      '[contact] Sending the email threw:',
+      error instanceof Error ? `${error.name}: ${error.message}` : error,
+    )
     return genericError(500)
   }
 }

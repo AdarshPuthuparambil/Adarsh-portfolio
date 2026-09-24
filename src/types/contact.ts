@@ -17,6 +17,7 @@ export type ContactApiRequest = ContactFormData & {
 export type ContactApiResponse = {
   success: boolean
   message: string
+  emailId?: string
 }
 
 export const CONTACT_LIMITS = {
