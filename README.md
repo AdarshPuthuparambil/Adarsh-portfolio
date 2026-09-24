@@ -32,7 +32,7 @@ Enquiries from the contact form are sent through a server-side `/api/contact` en
 Create a `.env` file in the project root (this file is gitignored):
 
 ```
-EMAIL_API_KEY=your_real_resend_api_key
+EMAIL_API_KEY=your_resend_api_key
 EMAIL_FROM=noreply@adarshpa.in
 EMAIL_TO=adarshputhuparambil324@gmail.com
 ```

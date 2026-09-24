@@ -81,7 +81,7 @@ export function Contact() {
         </div>
 
         <Reveal delay={320}>
-          <div className="mt-12 border border-dashed border-ink/10 p-5 dark:border-mist/10 dark:bg-gray-800 rounded-lg">
+          <div id="contact-form" className="mt-12 border border-dashed border-ink/10 p-5 dark:border-mist/10 dark:bg-gray-800 rounded-lg">
             <ContactForm />
           </div>
         </Reveal>
