@@ -11,6 +11,7 @@ import { Navbar } from './components/Navbar'
 import { PageProgress } from './components/PageProgress'
 import { Projects } from './components/Projects'
 import { Skills } from './components/Skills'
+import { WorkStage } from './components/WorkStage'
 import { ThemeProvider } from './hooks/useTheme'
 
 function App() {
@@ -24,12 +25,14 @@ function App() {
         <ButterflyFollower />
         <main>
           <Hero />
+          <WorkStage>
           <About />
-          <Experience />
-          <Skills />
-          <Projects />
-          <Education />
+            <Experience />
+            <Skills />
+            <Projects />
+            <Education />
           <Contact />
+          </WorkStage>
         </main>
         <Footer />
       </div>
