@@ -1,5 +1,5 @@
 import { ArrowDownRight, Mail } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { profile } from '../data/profile'
 import { useTheme } from '../hooks/useTheme'
 import { ResumeActions } from './ResumeActions'
@@ -7,12 +7,26 @@ import { SocialLinks } from './SocialLinks'
 
 const HEADLINE_START_MS = 450
 const HEADLINE_CHAR_MS = 38
+const BRAND_LETTER_MS = 900
+const BRAND_STAGGER_MS = 80
 
 export function Hero() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   const [typedHeadline, setTypedHeadline] = useState('')
   const [isTyping, setIsTyping] = useState(true)
+  const [isBrandSettled, setIsBrandSettled] = useState(false)
+
+  // The shine clips a gradient to the heading's glyphs, which only renders
+  // correctly once the per-letter entrance transforms have finished.
+  useEffect(() => {
+    const settleId = window.setTimeout(
+      () => setIsBrandSettled(true),
+      BRAND_LETTER_MS + (profile.brand.length - 1) * BRAND_STAGGER_MS,
+    )
+
+    return () => window.clearTimeout(settleId)
+  }, [])
 
   useEffect(() => {
     const full = profile.headline
@@ -76,11 +90,22 @@ export function Hero() {
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 pb-16 pt-28 sm:px-8 sm:pb-20">
         <h1
-          className={`animate-rise font-display text-[clamp(3.4rem,14vw,8.5rem)] leading-[0.88] font-extrabold tracking-[-0.04em] transition-colors duration-300 ${
-            isDark ? 'text-mist' : 'text-ink'
-          }`}
+          aria-label={profile.brand}
+          style={{ '--brand-chars': profile.brand.length } as CSSProperties}
+          className={`brand-fit font-display leading-[0.88] font-extrabold tracking-[-0.04em] whitespace-nowrap transition-colors duration-300 ${
+            isBrandSettled ? 'brand-shine' : ''
+          } ${isDark ? 'text-mist' : 'text-ink'}`}
         >
-          {profile.brand}
+          {[...profile.brand].map((char, index) => (
+            <span
+              key={`${char}-${index}`}
+              aria-hidden
+              className="brand-letter"
+              style={{ '--i': index } as CSSProperties}
+            >
+              {char === ' ' ? '\u00a0' : char}
+            </span>
+          ))}
         </h1>
 
         <p

@@ -97,6 +97,82 @@
   animation: drift 18s ease-in-out infinite;
 }
 
+/* Sizes the one-line brand so it always fits the hero container. Uppercase
+   Syne ExtraBold at the heading's tracking measures ~1.16em per character. */
+.brand-fit {
+  --brand-gutter: 2.5rem;
+  font-size: min(
+    8.5rem,
+    calc((min(100vw, 72rem) - var(--brand-gutter)) / (var(--brand-chars) * 1.17))
+  );
+}
+
+@media (min-width: 40rem) {
+  .brand-fit {
+    --brand-gutter: 4rem;
+  }
+}
+
+@keyframes brand-letter-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0.45em, 0) scale(0.9) rotate(5deg);
+    filter: blur(12px);
+  }
+  65% {
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    filter: blur(0);
+  }
+}
+
+@keyframes brand-shine {
+  0% {
+    background-position: 100% 0;
+  }
+  40%,
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.brand-letter {
+  display: inline-block;
+  animation: brand-letter-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 80ms);
+}
+
+/* Sweeps one highlight across the whole word rather than per letter. */
+.brand-shine {
+  background-image: linear-gradient(
+    100deg,
+    currentColor 0%,
+    currentColor 42%,
+    var(--color-accent) 50%,
+    currentColor 58%,
+    currentColor 100%
+  );
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: brand-shine 4.5s ease-in-out 0.3s infinite;
+}
+
+.dark .brand-shine {
+  background-image: linear-gradient(
+    100deg,
+    currentColor 0%,
+    currentColor 42%,
+    var(--color-accent-bright) 50%,
+    currentColor 58%,
+    currentColor 100%
+  );
+}
+
 @keyframes title-blink {
   0%,
   100% {
@@ -806,6 +882,16 @@
     transform: none;
     filter: none;
     transition: none;
+  }
+
+  .brand-letter {
+    animation: none;
+  }
+
+  .brand-shine {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
   }
 
   .animate-title-blink {
